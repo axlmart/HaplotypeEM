@@ -9,7 +9,7 @@
 using namespace std;
 
 
-std::vector<int> EMalgoDC (std::vector<int> M1, std::vector<int> M2);
+vector<int> EMalgoDC (vector<int> M1, vector<int> M2);
 //set <int> EM_Merge (set <int> List1, set <int> List2);
 
 
@@ -33,12 +33,11 @@ int main(int argc, char** argv){
 //
 // Note we will need to modify this loop to account for the possibility of odd # of markers.
 
-
-std::vector<int> M1_1;
-std::vector<int> M2_1;
-std::vector<int> M1_2;
-std::vector<int> M2_2;
-//std::vector<std::vector<int, int>, int> Haplolist;
+vector<int> M1_1;
+vector<int> M2_1;
+vector<int> M1_2;
+vector<int> M2_2;
+//vector<vector<int, int>, int> Haplolist;
 for ( int i = 0 ; i < my_matrix.colNums(); i=i+4) {
 	M1_1 = my_matrix.GetCol(i);
 	M2_1 = my_matrix.GetCol(i+1);
@@ -48,15 +47,12 @@ for ( int i = 0 ; i < my_matrix.colNums(); i=i+4) {
         M2_2 = my_matrix.GetCol(i+3);
 
 	EMalgoDC(M1_2,M2_2);
-
 }
-	
-
 
 return 0;
 }
 
-std::vector<int> EMalgoDC (std::vector<int> M1, std::vector<int> M2) {
+vector<int> EMalgoDC (vector<int> M1, vector<int> M2) {
 
 // First step : Find unambiguous haplotypes
 
@@ -138,7 +134,7 @@ cout << "Iteration : " << it << ", p00 : " << p00 << ", p01 : " << p01 << ", p10
 
 // Get list of possible haplotypes from final haplotype probs :
 
-std::vector<int> HaplotypeList;
+vector<int> HaplotypeList;
 if ( p00 > pow(10,-10)) {HaplotypeList.push_back(0);}
 if ( p01 > pow(10,-10)) {HaplotypeList.push_back(1);}
 if ( p10 > pow(10,-10)) {HaplotypeList.push_back(10);}
@@ -153,8 +149,6 @@ return HaplotypeList;
 //
 // Takes Input : Genotypes from 4 columns, list of possible haplotype on these columns, set equal frequency to each (within function.
 // outputs possible haplotypes at these positions (perhaps keep track of frequencies for later use).
-
- 
  
 /*
 vector<int> EM_Merge(set<int> List1 , set<int> List2) {
@@ -185,7 +179,7 @@ for (iter=List2.begin(); iter !=List2.end() ; ++iter) {
 
 cout << endl << endl;
 
-std::vector<int> PosHaplo;
+vector<int> PosHaplo;
 
 if(std::find(M1.begin(), M1.end(), 0) != M1.end() && std::find(M2.begin(), M2.end(), 0) != M2.end()) {
 PosHaplo.push_back(0);

@@ -19,12 +19,12 @@ int main(int argc, char** argv){
 
 
 // Divide the matrix in submatrices of 2 columns including all rows.
-// Call outside EM function on each subproblem.
-//
+// Call outside EM function on each subproblem. Hi Axel!
+
 // Note for now (at least) the entries are intergers (because changing the Matrix.h 
 // to allow for strings seemed complicated). Thus each value represents a different genotype :
 // integer value --> genotype 
-//
+
 // 0 --> 0/0
 // 1 --> 0/1
 // 10 --> 1/0

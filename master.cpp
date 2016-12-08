@@ -9,6 +9,12 @@
 #include <map>
 using namespace std;
 
+//this has a problem in the enumeration of our haplotypes when doing 3 bps (because we enumeration at 4)
+// idea! add indicator variable that would increase starting index to 4 if locus_size==3
+// something like int blah=(locus_size==3 ? 1 : 0)*4
+// then int i = 0 + blah would be 0 if locus_size==2 , 4 if locus_size==3
+// we need this distinction to properly update hap_prob, print the correct observed counts table, and maybe
+// something else needs it too
 
 void init_EM( map<int, std::set <int> > pos_hapmap , map<int, int> obs_map , Matrix615<int>&
 	my_matrix , map <int , vector<int> >& pos_hap_all_markers , int locus_num){
@@ -22,9 +28,11 @@ void init_EM( map<int, std::set <int> > pos_hapmap , map<int, int> obs_map , Mat
 	int locus_size = 2; //start out assuming we are looking at 2 markers
 	if ((my_matrix.colNums()-locus_num*2)==3){ locus_size=3;} //if we are looking at the last locus
 								//and it is of size 3, account for it
+	int index_adj=(locus_size==3 ? 1 : 0)*4;
 	
+	//should allocate and delete this memory
 	map<int, double> hap_prob;
-	for (int i=0 ; i<pow(2,locus_size); ++i){
+	for (int i=0+index_adj ; i<pow(2,locus_size)+index_adj; ++i){
 		hap_prob[i]= 1 / double(pow(2,locus_size));
 	}
 	
@@ -40,7 +48,7 @@ void init_EM( map<int, std::set <int> > pos_hapmap , map<int, int> obs_map , Mat
 					if(my_matrix.data[n][locus_num*2 + m]==0){//if we have two  0s at the second marker
 						pos_hapmap[n].erase(1); pos_hapmap[n].erase(3); } //remove 1 and 3
 					else if(my_matrix.data[n][locus_num*2 + m]==11){ //if we have two 1s at the second marker
-						pos_hapmap[n].erase(0); pos_hapmap[n].erase(1); } //remove 0 and 2
+						pos_hapmap[n].erase(0); pos_hapmap[n].erase(2); } //remove 0 and 2
 				}
 			}
 		}
@@ -56,11 +64,11 @@ void init_EM( map<int, std::set <int> > pos_hapmap , map<int, int> obs_map , Mat
 						pos_hapmap[n].erase(6); pos_hapmap[n].erase(7);}
 				} else if (m==1){
 					if (my_matrix.data[n][locus_num*2 + m]==0){
-						pos_hapmap[n].erase(8); pos_hapmap[n].erase(9);
-						pos_hapmap[n].erase(10); pos_hapmap[n].erase(11);}
-					else if(my_matrix.data[n][locus_num*2 + m]==11){
 						pos_hapmap[n].erase(6); pos_hapmap[n].erase(7);
 						pos_hapmap[n].erase(10); pos_hapmap[n].erase(11);}
+					else if(my_matrix.data[n][locus_num*2 + m]==11){
+						pos_hapmap[n].erase(4); pos_hapmap[n].erase(5);
+						pos_hapmap[n].erase(8); pos_hapmap[n].erase(9);}
 				} else{
 					if (my_matrix.data[n][locus_num*2 + m]==0){
 						pos_hapmap[n].erase(5); pos_hapmap[n].erase(7);
@@ -88,10 +96,38 @@ void init_EM( map<int, std::set <int> > pos_hapmap , map<int, int> obs_map , Mat
 		
 	}
 			
-	//add something to print the observed haps	
+	//add something to print the observed haps
+	
+	std::set<int>::iterator it2;
+	
+	cout << "Possible Haplotypes" << endl << endl;
+	
+	for (int i=0; i<my_matrix.rowNums(); i++){
+		cout << "Person " << i+1 << ": ";
+		for (it2=pos_hapmap[i].begin(); it2!=pos_hapmap[i].end(); ++it2){
+			cout<< *it2 << " ";
+		}
+		cout<<endl;
+	}
+	
+	cout << endl << endl << "Observed Counts" << endl << endl;
+	
+	for (int i=0+index_adj; i<pow(2,locus_size)+index_adj; ++i){
+		cout << "Haplotype " << i << ": ";
+		cout<< obs_map[i];
+		cout << endl;
+	}	
 		
-	//Run EM udating observed map and hap_prob
+	//Run EM udating observed map and hap_prob (still needs to be added)
 	//push back hap probs >0 into pos_hap_all_markers[locus_num]
+	
+	for (int i=0+index_adj; i<pow(2,locus_size)+index_adj; ++i){
+		if (hap_prob[i] > 0.000001){ //change to fit whatever we decide
+			pos_hap_all_markers[locus_num].push_back(i);
+		}
+	}
+	
+	
 	
 }
 		
@@ -124,6 +160,7 @@ int main(int argc, char** argv){
 // Note we will need to modify this loop to account for the possibility of odd # of markers.
 
 	int N = my_matrix.rowNums();
+	int M = my_matrix.colNums();
 
 /*create a map of possible haplotypes where each key is a person. 
 0 corresponds to <0,0>
@@ -160,9 +197,47 @@ int main(int argc, char** argv){
 	map<int, int> observed_map_2bp; //these keep count of the number of haplotypes we observed
 	map<int, int> observed_map_3bp;
 	
-	//need to call function
-
+	map<int, vector<int> > pos_hap_all_markers;
+	
+	
+	//add for loop to go through every 2/3 bp hap
+	
+	for (int i=0; i< floor((double)M/2); i++){
+		cout << "Marker Pair " << i << endl;
+		if ((M-i*2)==3){
+			init_EM(master_hapmap_3bp, observed_map_3bp, my_matrix,
+				pos_hap_all_markers, i);
+		}
+		else{
+			init_EM(master_hapmap_2bp, observed_map_2bp, my_matrix,
+				pos_hap_all_markers, i);
+		}
+		cout << endl;
+	}
+	
+	
+	//print pos_haps (should be all at this point since we haven't added the EM part)
+	
+	for (int i=0; i< floor((double)M/2); ++i){
+		cout << "Marker Pair " << i << endl;
+		for (int j=0; j<pos_hap_all_markers[i].size(); j++){
+			cout << pos_hap_all_markers[i][j]<< " ";
+		}
+		cout<<endl;
+	}
 
 	return 0;	
 
-}                 
+}
+
+	
+	
+	
+
+
+ 
+
+
+
+
+

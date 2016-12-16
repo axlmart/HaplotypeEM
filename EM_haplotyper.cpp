@@ -207,7 +207,7 @@ void init_EM( map<int, std::set <int> > pos_miniHaps_byPerson , map<int, int> ob
 	// now just have to push back temp values into original map
 	for (int i=0+index_adj; i<pow(2,locus_size)+index_adj; ++i){ 
 		hap_prob[i] = hap_prob_temp[i];
-		cout << " Prob haplo " << i << " = " << hap_prob[i] << endl; ;
+		cout << "Probability haplotype " << i << " = " << hap_prob[i] << endl; ;
 		}
 		cout << endl << endl;
 	
@@ -373,6 +373,8 @@ map<int, set<pair<int,int> > > diplotyper2(map<int, set<int> >& pos_fullHaps_enu
 		}
 		cout<<endl;
 	}
+	
+	cout << endl<< endl;
 	
 	return diplotype_map;
 }
